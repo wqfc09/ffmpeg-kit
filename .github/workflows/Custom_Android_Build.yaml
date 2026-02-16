@@ -74,6 +74,12 @@ jobs:
             --enable-protocol=file,http,https,tcp,udp
             
         run: |
+          # --- 核心魔改：针对 NDK 29+ 禁用 cpu-features ---
+          # 1. 在 android.mk 模板中注释掉 cpu-features 的引用
+          find . -name "Android.mk" -exec sed -i 's/$(call import-module,android\/cpufeatures)/# disabled cpufeatures/g' {} +   
+          # 2. 在 main 编译脚本中强行跳过 cpu-features 阶段，这一步是为了防止脚本因为找不到该模块而直接中断
+          sed -i 's/build_cpu_features/# build_cpu_features/g' scripts/main-android.sh
+          
           chmod +x android.sh
           ./android.sh \
             --disable-arm-v7a \
