@@ -56,7 +56,6 @@ jobs:
           # 必须在这里显式重新声明映射，确保变量进入该步骤的 Shell 环境
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-        run: |
           FFMPEG_KIT_FFMPEG_CONFIGURE_FLAGS: >-
             --enable-version3 --disable-gpl --disable-nonfree
             --disable-all
@@ -74,6 +73,7 @@ jobs:
             --enable-muxer=avi,mp4,mov,null,image2
             --enable-protocol=file,http,https,tcp,udp
             
+        run: |
           chmod +x android.sh
           ./android.sh \
             --disable-arm-v7a \
