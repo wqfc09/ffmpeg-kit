@@ -68,7 +68,6 @@ jobs:
             --disable-arm-v7a \
             --disable-x86 \
             --disable-x86-64 \
-            --enable-mediacodec \
             --custom-argument="\
               --prefix=$HOME/publish \
               --enable-version3 --disable-gpl --disable-nonfree \
@@ -79,7 +78,7 @@ jobs:
               --enable-mediacodec \
               --enable-hwaccel=h264_mediacodec,hevc_mediacodec \
               --enable-decoder=h264_mediacodec,hevc_mediacodec,h264,hevc,vp9,av1,aac,mp3 \
-              --enable-encoder=h264_mediacodec,hevc_mediacodec,aac \
+              --enable-encoder=h264_mediacodec,hevc_mediacodec,wrapped_avframe,aac \
               --enable-parser=h264,hevc,vp9,av1,aac \
               --enable-indev=lavfi \
               --enable-filter=split,scale,format,null,unsharp,eq,hqdn3d,hwupload,hwdownload,testsrc2,color,buffer,buffersink,transpose,crop,fps \
