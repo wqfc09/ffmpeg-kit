@@ -57,34 +57,29 @@ jobs:
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
         run: |
-          # 检查变量是否真的进来了 (调试用)
-          if [ -z "$ANDROID_SDK_ROOT" ]; then echo "SDK ROOT IS STILL EMPTY"; exit 1; fi
-          
+          FFMPEG_KIT_FFMPEG_CONFIGURE_FLAGS: >-
+            --enable-version3 --disable-gpl --disable-nonfree
+            --disable-all
+            --enable-ffmpeg --enable-ffprobe
+            --enable-avcodec --enable-avformat --enable-avfilter --enable-avdevice --enable-swresample --enable-swscale
+            --enable-jni
+            --enable-mediacodec
+            --enable-hwaccel=h264_mediacodec,hevc_mediacodec,vp9_mediacodec,av1_mediacodec
+            --enable-decoder=h264_mediacodec,hevc_mediacodec,vp9_mediacodec,av1_mediacodec,h264,hevc,vp9,av1,aac,mp3,wrapped_avframe
+            --enable-encoder=h264_mediacodec,hevc_mediacodec,vp9_mediacodec,av1_mediacodec,aac,wrapped_avframe
+            --enable-parser=h264,hevc,vp9,av1,aac
+            --enable-indev=lavfi
+            --enable-filter=split,scale,format,null,unsharp,eq,hqdn3d,hwupload,hwdownload,testsrc2,color,buffer,buffersink,transpose,crop,fps
+            --enable-demuxer=lavfi,avi,mov,mp4,m4a,yuv4mpegpipe,h264,hevc,aac,mp3,matroska
+            --enable-muxer=avi,mp4,mov,null,image2
+            --enable-protocol=file,http,https,tcp,udp
+            
           chmod +x android.sh
-          
-          # --disable-arm-v7a --disable-x86... : 只编译 arm64-v8a
-          
           ./android.sh \
             --disable-arm-v7a \
             --disable-x86 \
             --disable-x86-64 \
-            --custom-argument="\
-              --prefix=$HOME/publish \
-              --enable-version3 --disable-gpl --disable-nonfree \
-              --disable-all \
-              --enable-ffmpeg --enable-ffprobe \
-              --enable-avcodec --enable-avformat --enable-avfilter --enable-avdevice --enable-swresample --enable-swscale \
-              --enable-jni \
-              --enable-mediacodec \
-              --enable-hwaccel=h264_mediacodec,hevc_mediacodec \
-              --enable-decoder=h264_mediacodec,hevc_mediacodec,h264,hevc,vp9,av1,aac,mp3 \
-              --enable-encoder=h264_mediacodec,hevc_mediacodec,wrapped_avframe,aac \
-              --enable-parser=h264,hevc,vp9,av1,aac \
-              --enable-indev=lavfi \
-              --enable-filter=split,scale,format,null,unsharp,eq,hqdn3d,hwupload,hwdownload,testsrc2,color,buffer,buffersink,transpose,crop,fps \
-              --enable-demuxer=lavfi,avi,mov,mp4,m4a,yuv4mpegpipe,h264,hevc,aac,mp3,matroska \
-              --enable-muxer=avi,mp4,mov,null,image2 \
-              --enable-protocol=file,http,https,tcp,udp"
+            --enable-android-zlib
 
       # 6. 上传产物 (AAR)
       - name: Upload Artifacts
