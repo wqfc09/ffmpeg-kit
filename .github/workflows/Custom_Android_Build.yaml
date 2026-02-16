@@ -26,12 +26,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # 3. 配置 Android NDK (r25c)
-      - name: Setup Android NDK
-        uses: n0rt3n/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r25c
+      # 3. 配置 Android NDK
+      - name: Set up Android NDK Environment
+        run: |
+          # 自动定位系统预装的 NDK 路径，通常路径类似 /usr/local/lib/android/sdk/ndk/25.x.xxxx
+          
+          NDK_PATH=$(ls -d $ANDROID_SDK_ROOT/ndk/* | tail -1)
+          
+          # 将其写入全局环境变量，供后续 Step 使用
+          
+          echo "ANDROID_NDK_ROOT=$NDK_PATH" >> $GITHUB_ENV
+          echo "Using NDK found at: $NDK_PATH"
 
       # 4. 安装编译依赖
       - name: Install Dependencies
@@ -46,7 +51,7 @@ jobs:
       # 5. 执行编译脚本
       - name: Build with Custom Arguments
         env:
-          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
           ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
         run: |
           chmod +x android.sh
