@@ -36,7 +36,9 @@ jobs:
           # 将其写入全局环境变量，供后续 Step 使用
           
           echo "ANDROID_NDK_ROOT=$NDK_PATH" >> $GITHUB_ENV
-          echo "Using NDK found at: $NDK_PATH"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "Using NDK: $NDK_PATH"
+          echo "Using SDK: $ANDROID_SDK_ROOT"
 
       # 4. 安装编译依赖
       - name: Install Dependencies
@@ -51,12 +53,16 @@ jobs:
       # 5. 执行编译脚本
       - name: Build with Custom Arguments
         env:
+          # 必须在这里显式重新声明映射，确保变量进入该步骤的 Shell 环境
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
         run: |
+          # 检查变量是否真的进来了 (调试用)
+          if [ -z "$ANDROID_SDK_ROOT" ]; then echo "SDK ROOT IS STILL EMPTY"; exit 1; fi
+          
           chmod +x android.sh
           
-          # --disable-arm-v7a --disable-x86... : 只编译 arm64-v8a，减小体
+          # --disable-arm-v7a --disable-x86... : 只编译 arm64-v8a
           
           ./android.sh \
             --disable-arm-v7a \
