@@ -16,7 +16,7 @@ jobs:
       - name: Checkout FFmpeg Kit
         uses: actions/checkout@v4
         with:
-          repository: arthneica/ffmpeg-kit
+          repository: wqfc09/ffmpeg-kit
           ref: main 
 
       # 2. 配置 JDK (Gradle 打包需要)
