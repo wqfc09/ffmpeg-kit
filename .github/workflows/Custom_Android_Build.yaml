@@ -85,11 +85,18 @@ jobs:
           [ -f build.log ] && tail -n 500 build.log
           echo "=== config.log ==="
           find src -name "config.log" -exec tail -n 500 {} +
+          echo "Scanning for AAR files..."
+          find . -name "*.aar"
+          echo "Scanning for SO files (Native Libraries)..."
+          find . -name "*.so"
+
 
       # 7. 上传产物 (AAR)
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-kit-android-custom
-          path: prebuilt/android-aar/**/*.aar
+          path: |
+            **/build/outputs/aar/*.aar
+            android/libs/**/*.aar
           if-no-files-found: error
