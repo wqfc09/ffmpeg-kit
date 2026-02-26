@@ -47,14 +47,28 @@ jobs:
             --enable-libwebp
         run: |
           chmod +x ios.sh
-          ./ios.sh --disable-armv7 --disable-i386 | tee build.log
+          ./ios.sh -x --disable-armv7 --disable-i386 | tee build.log
 
       - name: Check Build Outputs
         run: |
-          echo "=== XCFramework / Framework Files ==="
-          find . -name "*.xcframework" -o -name "*.framework" | head -n 200
+          echo "=== XCFramework Files ==="
+          find . -type d -name "*.xcframework" | head -n 200
           echo "=== WebP Signals in Log ==="
           grep -Ei "libwebp|webp" build.log | tail -n 40 || true
+
+      - name: Pack XCFramework Artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/ios-xcframework
+          mapfile -t XCFS < <(find prebuilt -type d -name "*.xcframework" | sort)
+          if [ "${#XCFS[@]}" -eq 0 ]; then
+            echo "No xcframework output found under prebuilt/"
+            exit 1
+          fi
+          for xcf in "${XCFS[@]}"; do
+            cp -R "$xcf" artifacts/ios-xcframework/
+          done
+          ditto -c -k --sequesterRsrc --keepParent artifacts/ios-xcframework ffmpegkit-ios-xcframework.zip
 
       - name: Print Build Logs on Failure
         if: failure()
@@ -70,7 +84,5 @@ jobs:
           name: ffmpeg-kit-ios-custom-webp
           if-no-files-found: error
           path: |
-            **/*.xcframework/**
-            **/*.framework/**
-            prebuilt/**/*
+            ffmpegkit-ios-xcframework.zip
             build.log
