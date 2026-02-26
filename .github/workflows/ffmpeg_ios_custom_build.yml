@@ -37,7 +37,7 @@ jobs:
             --enable-ffmpeg --enable-ffprobe
             --enable-avcodec --enable-avformat --enable-avfilter --enable-avdevice --enable-avutil --enable-swresample --enable-swscale
             --enable-videotoolbox
-            --enable-protocol=file,pipe,http,https,tcp,udp
+            --enable-protocol=file,pipe,http,tcp,udp
             --enable-demuxer=mov,mp4,m4a,matroska,avi,webp,image2,h264,hevc,aac,mp3
             --enable-muxer=mp4,mov,image2,webp,null
             --enable-parser=h264,hevc,aac,mpegaudio
@@ -60,14 +60,24 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/ios-xcframework
-          mapfile -t XCFS < <(find prebuilt -type d -name "*.xcframework" | sort)
-          if [ "${#XCFS[@]}" -eq 0 ]; then
-            echo "No xcframework output found under prebuilt/"
+
+          # macOS 默认 /bin/bash 为 3.2，不支持 mapfile，这里改为兼容写法
+          XCF_LIST_FILE="$(mktemp)"
+          find prebuilt -type d -name "*.xcframework" > "$XCF_LIST_FILE" || true
+          if [ ! -s "$XCF_LIST_FILE" ]; then
+            # 部分 fork 的输出目录不在 prebuilt，下探到工作目录兜底
+            find . -type d -name "*.xcframework" > "$XCF_LIST_FILE" || true
+          fi
+
+          if [ ! -s "$XCF_LIST_FILE" ]; then
+            echo "No xcframework output found in workspace."
             exit 1
           fi
-          for xcf in "${XCFS[@]}"; do
+
+          while IFS= read -r xcf; do
             cp -R "$xcf" artifacts/ios-xcframework/
-          done
+          done < "$XCF_LIST_FILE"
+
           ditto -c -k --sequesterRsrc --keepParent artifacts/ios-xcframework ffmpegkit-ios-xcframework.zip
 
       - name: Print Build Logs on Failure
